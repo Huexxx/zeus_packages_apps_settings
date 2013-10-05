@@ -113,4 +113,11 @@
     <string name="battery_light_medium_color_title">Media Carga</string>
     <string name="battery_light_full_color_title">Carga completa</string>
 
+    <!-- Android debugging over WiFi -->
+    <string name="adb_over_network">ADB por red</string>
+    <string name="adb_over_network_summary">Habilitar depuración TCP/IP a través de las interfaces de red (redes Wi-Fi, USB). Este ajuste se reestablece al reiniciar</string>
+
+    <!-- Warning for Adb over Network -->
+    <string name="adb_over_network_warning">ATENCIÓN: Cuando ADB por red está habilitado el teléfono es vulnerable a intrusos conectados a la red, incluida la red GSM!\n\nSólo utilizar esta función cuando estemos conectados a redes de confianza.\n\n¿Sigue queriendo habilitar esta función?</string>
+
 </resources>
