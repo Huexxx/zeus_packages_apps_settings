@@ -863,7 +863,6 @@
                 android:value="com.android.settings.NotificationStation" />
         </activity>
 
-        <!--
         <activity android:name="Settings$AppOpsSummaryActivity"
                 android:label="@string/app_ops_settings"
                 android:taskAffinity=""
@@ -879,9 +878,8 @@
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
                 android:value="com.android.settings.applications.AppOpsSummary" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
-                android:resource="@id/application_settings" />
+                android:resource="@id/app_ops_settings" />
         </activity>
-        -->
 
         <activity android:name="Settings$LocationSettingsActivity"
                 android:uiOptions="splitActionBarWhenNarrow"

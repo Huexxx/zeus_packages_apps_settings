@@ -27,6 +27,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.util.Log;
@@ -144,14 +145,22 @@ public class AppOpsDetails extends Fragment {
                 final int switchOp = AppOpsManager.opToSwitch(firstOp.getOp());
                 sw.setChecked(mAppOps.checkOp(switchOp, entry.getPackageOps().getUid(),
                         entry.getPackageOps().getPackageName()) == AppOpsManager.MODE_ALLOWED);
-                sw.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        mAppOps.setMode(switchOp, entry.getPackageOps().getUid(),
-                                entry.getPackageOps().getPackageName(), isChecked
-                                ? AppOpsManager.MODE_ALLOWED : AppOpsManager.MODE_IGNORED);
-                    }
-                });
+                // Lock switch if policy in place.
+                if (firstOp.getLocked()) {
+                    sw.setEnabled(false);
+                    TextView v = (TextView)view.findViewById(R.id.op_time);
+                    v.setText("(Locked)");
+                    v.setTextColor(Color.RED);
+                } else {
+                    sw.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
+                            @Override
+                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                mAppOps.setMode(switchOp, entry.getPackageOps().getUid(),
+                                                entry.getPackageOps().getPackageName(), isChecked
+                                                ? AppOpsManager.MODE_ALLOWED : AppOpsManager.MODE_IGNORED);
+                            }
+                        });
+                }
             }
         }
 

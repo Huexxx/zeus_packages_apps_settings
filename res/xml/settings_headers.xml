@@ -111,6 +111,12 @@
         android:title="@string/user_settings_title"
         android:id="@+id/user_settings" />
 
+    <header
+        android:fragment="com.android.settings.applications.AppOpsSummary"
+        android:icon="@drawable/ic_settings_applications"
+        android:title="@string/app_ops_settings"
+        android:id="@+id/app_ops_settings" />
+
     <!-- Manage NFC payment apps -->
     <header
         android:fragment="com.android.settings.nfc.PaymentSettings"
