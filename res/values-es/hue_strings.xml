@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- System Interface settings  -->
+    <string name="system_settings_title">Ajustes de Huexxx</string>
+    <string name="system_interface_title">Ajustes de Huexxx</string>
+  
+    <!-- Navigation Bar -->
+    <string name="navigation_bar_title">Barra de navegación</string>
+
+    <!-- Navigation Bar Height -->
+    <string name="navigation_bar_height">Altura de la barra de navegación</string>
+    <string name="navigation_bar_height_48">48dp (por defecto)</string>
+    <string name="navigation_bar_height_0">0dp (oculta)</string>
+
+</resources>

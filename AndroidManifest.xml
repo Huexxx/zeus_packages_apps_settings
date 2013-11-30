@@ -1763,6 +1763,9 @@
             </intent-filter>
         </activity>
 
+        <!-- Huexxx's Tweaks -->
+        <activity android:name=".huexxx.SystemSettings" />
+
         <receiver android:name=".widget.SettingsAppWidgetProvider"
                 android:label="@string/gadget_title"
                 android:exported="false"
