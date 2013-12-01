@@ -5,9 +5,14 @@
     android:title="@string/system_interface_title"
     xmlns:settings="http://schemas.android.com/apk/res/com.android.settings">
 
-   <PreferenceScreen
+    <PreferenceScreen
         android:key="navigation_bar"
         android:fragment="com.android.settings.huexxx.NavigationBarSettings"
         android:title="@string/navigation_bar_title" />
+
+    <PreferenceScreen
+        android:key="status_bar"
+        android:fragment="com.android.settings.huexxx.StatusBarSettings"
+        android:title="@string/status_bar_title" />
 
 </PreferenceScreen>

@@ -21,4 +21,16 @@
     <string name="navigation_bar_height_20">20dp</string>
     <string name="navigation_bar_height_0">0dp (hide)</string>
 
+    <!-- Status bar  -->
+    <string name="status_bar_title">Status bar</string>
+
+    <!-- Statusbar native battery percent -->
+    <string name="status_bar_native_battery_percentage">Native battery percentage</string>
+    <string name="status_bar_native_battery_percentage_summary">Show battery percentage inside the icon</string>
+
+    <!-- Status bar brightness control -->
+    <string name="status_bar_toggle_brightness">Brightness control</string>
+    <string name="status_bar_toggle_brightness_summary">Adjust brightness by sliding across status bar</string>
+    <string name="status_bar_toggle_info">Automatic brightness must be disabled</string>
+
     </resources>

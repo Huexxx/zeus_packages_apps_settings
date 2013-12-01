@@ -14,4 +14,16 @@
     <string name="navigation_bar_height_48">48dp (por defecto)</string>
     <string name="navigation_bar_height_0">0dp (oculta)</string>
 
+    <!-- Status bar  -->
+    <string name="status_bar_title">Barra de estado</string>
+
+    <!-- Statusbar native battery percent -->
+    <string name="status_bar_native_battery_percentage">Porcentaje nativo de batería</string>
+    <string name="status_bar_native_battery_percentage_summary">Mostrar porcentaje de carga de batería dentro del icono</string>
+
+    <!-- Status bar brightness control -->
+    <string name="status_bar_toggle_brightness">Control de brillo</string>
+    <string name="status_bar_toggle_brightness_summary">Ajustar brillo mediante el deslizamiento por la barra de estado</string>
+    <string name="status_bar_toggle_info">El brillo automático debe estar desactivado</string>
+
 </resources>
