@@ -5,6 +5,9 @@
     <!-- About phone screen, build date of ROM -->
     <string name="build_date">Fecha de compilación</string>
 
+    <!-- About phone screen, Free memory info -->
+    <string name="mem_info">Memoria</string>
+
     <!-- System Interface settings  -->
     <string name="system_settings_title">Ajustes de Huexxx</string>
     <string name="system_interface_title">Ajustes de Huexxx</string>
