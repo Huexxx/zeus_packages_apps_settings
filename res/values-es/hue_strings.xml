@@ -26,4 +26,13 @@
     <string name="status_bar_toggle_brightness_summary">Ajustar brillo mediante el deslizamiento por la barra de estado</string>
     <string name="status_bar_toggle_info">El brillo automático debe estar desactivado</string>
 
+    <!-- Quick settings -->
+    <string name="quick_pulldown">Despliegue rápido</string>
+    <string name="quick_pulldown_summary">El borde %1$s de la barra de notificaciones desplegará el panel de ajustes rápidos</string>
+    <string name="quick_pulldown_summary_left">izquierdo</string>
+    <string name="quick_pulldown_summary_right">derecho</string>
+    <string name="quick_pulldown_off">Desactivado</string>
+    <string name="quick_pulldown_left">Borde izquierdo</string>
+    <string name="quick_pulldown_right">Borde derecho</string>
+
 </resources>

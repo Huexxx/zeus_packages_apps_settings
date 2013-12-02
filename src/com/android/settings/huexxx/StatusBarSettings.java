@@ -1,9 +1,12 @@
 
 package com.android.settings.huexxx;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceScreen;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -12,15 +15,15 @@ import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
 import com.android.settings.Utils;
 
-public class StatusBarSettings extends SettingsPreferenceFragment {
+public class StatusBarSettings extends SettingsPreferenceFragment implements OnPreferenceChangeListener {
 
-    // General
     private static final String STATUS_BAR_BRIGHTNESS_CONTROL = "status_bar_brightness_control";
     private static final String STATUS_BAR_NATIVE_BATTERY_PERCENTAGE = "status_bar_native_battery_percentage";
+    private static final String QUICK_PULLDOWN = "quick_pulldown";
 
-    // General
     private CheckBoxPreference mStatusBarNativeBatteryPercentage;
     private CheckBoxPreference mStatusBarBrightnessControl;
+    private ListPreference mQuickPulldown;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -28,32 +31,55 @@ public class StatusBarSettings extends SettingsPreferenceFragment {
 
         addPreferencesFromResource(R.xml.status_bar_settings);
 
-            mStatusBarBrightnessControl = (CheckBoxPreference) getPreferenceScreen().findPreference(STATUS_BAR_BRIGHTNESS_CONTROL);
-            mStatusBarNativeBatteryPercentage = (CheckBoxPreference) getPreferenceScreen().
-                    findPreference(STATUS_BAR_NATIVE_BATTERY_PERCENTAGE);
+        mStatusBarBrightnessControl = (CheckBoxPreference) getPreferenceScreen().findPreference(STATUS_BAR_BRIGHTNESS_CONTROL);
+        mStatusBarNativeBatteryPercentage = (CheckBoxPreference) getPreferenceScreen().
+                findPreference(STATUS_BAR_NATIVE_BATTERY_PERCENTAGE);
+        mQuickPulldown = (ListPreference) getPreferenceScreen().findPreference(QUICK_PULLDOWN);
 
-            // Status bar brightness control
-            if (!Utils.isPhone(getActivity())) {
-                // only show on phones
-                getPreferenceScreen().removePreference(mStatusBarBrightnessControl);
-            } else {
-                mStatusBarBrightnessControl.setChecked((Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(), 
-                        Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0) == 1));
-                try {
-                    if (Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(),
-                            Settings.System.SCREEN_BRIGHTNESS_MODE) == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC) {
-                        mStatusBarBrightnessControl.setEnabled(false);
-                        mStatusBarBrightnessControl.setSummary(R.string.status_bar_toggle_info);
-                    }
-                } catch (SettingNotFoundException e) {
+        if (!Utils.isPhone(getActivity())) {
+            // only show on phones
+            getPreferenceScreen().removePreference(mStatusBarBrightnessControl);
+            if (mQuickPulldown != null)
+                getPreferenceScreen().removePreference(mQuickPulldown);
+        } else {
+            // Status bar brightness
+            mStatusBarBrightnessControl.setChecked((Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(), 
+                    Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0) == 1));
+            try {
+                if (Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(),
+                        Settings.System.SCREEN_BRIGHTNESS_MODE) == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC) {
+                    mStatusBarBrightnessControl.setEnabled(false);
+                    mStatusBarBrightnessControl.setSummary(R.string.status_bar_toggle_info);
                 }
+            } catch (SettingNotFoundException e) {
             }
 
-            // Native battery percentage
-            mStatusBarNativeBatteryPercentage.setChecked((Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(), 
-                    Settings.System.STATUS_BAR_NATIVE_BATTERY_PERCENTAGE, 0) == 1));
-
+            // Quick pulldown
+            mQuickPulldown.setOnPreferenceChangeListener(this);
+            int quickPulldownValue = Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(), 
+                    Settings.System.QS_QUICK_PULLDOWN, 0);
+            mQuickPulldown.setValue(String.valueOf(quickPulldownValue));
+            updatePulldownSummary(quickPulldownValue);
         }
+
+        // Native battery percentage
+        mStatusBarNativeBatteryPercentage.setChecked((Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(), 
+                Settings.System.STATUS_BAR_NATIVE_BATTERY_PERCENTAGE, 0) == 1));
+    }
+
+    public boolean onPreferenceChange(Preference preference, Object objValue) {
+
+        if (preference == mQuickPulldown) {
+            int quickPulldownValue = Integer.valueOf((String) objValue);
+            int quickPulldownIndex = mQuickPulldown.findIndexOfValue((String) objValue);
+            Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
+                    Settings.System.QS_QUICK_PULLDOWN, quickPulldownValue);
+            mQuickPulldown.setSummary(mQuickPulldown.getEntries()[quickPulldownIndex]);
+            updatePulldownSummary(quickPulldownValue);
+            return true;
+        }
+        return false;
+    }
 
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
         boolean value;
@@ -69,5 +95,19 @@ public class StatusBarSettings extends SettingsPreferenceFragment {
             return true;
         }
         return false;
+    }
+
+    private void updatePulldownSummary(int value) {
+        Resources res = getResources();
+
+        if (value == 0) {
+            /* quick pulldown deactivated */
+            mQuickPulldown.setSummary(res.getString(R.string.quick_pulldown_off));
+        } else {
+            String direction = res.getString(value == 2
+                    ? R.string.quick_pulldown_summary_left
+                    : R.string.quick_pulldown_summary_right);
+            mQuickPulldown.setSummary(res.getString(R.string.quick_pulldown_summary, direction));
+        }
     }
 }

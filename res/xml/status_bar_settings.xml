@@ -15,4 +15,11 @@
         android:summary="@string/status_bar_native_battery_percentage_summary"
         android:title="@string/status_bar_native_battery_percentage" />
 
+    <ListPreference
+        android:entries="@array/quick_pulldown_entries"
+        android:entryValues="@array/quick_pulldown_values"
+        android:key="quick_pulldown"
+        android:persistent="false"
+        android:title="@string/quick_pulldown" />
+
 </PreferenceScreen>
