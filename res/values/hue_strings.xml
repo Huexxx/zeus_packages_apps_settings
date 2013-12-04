@@ -49,9 +49,10 @@
     <!-- Status bar  -->
     <string name="status_bar_title">Status bar</string>
 
-    <!-- Statusbar native battery percent -->
-    <string name="status_bar_native_battery_percentage">Native battery percentage</string>
-    <string name="status_bar_native_battery_percentage_summary">Show battery percentage inside the icon</string>
+    <!-- Status bar battery percent -->
+    <string name="status_bar_battery_percentage">Battery percentage</string>
+    <string name="status_bar_battery_percentage_summary">Show charge percentage inside the icon</string>
+    <string name="status_bar_battery_percentage_info">Battery icon must be shown</string>
 
     <!-- Status bar brightness control -->
     <string name="status_bar_toggle_brightness">Brightness control</string>
@@ -67,11 +68,10 @@
     <string name="quick_pulldown_left">Left</string>
     <string name="quick_pulldown_right">Right</string>
 
-    <!-- Icon style  -->
-    <string name="status_bar_battery">Battery status style</string>
-    <string name="status_bar_style_icon">Native icon</string>
-    <string name="status_bar_style_hidden">Hidden</string>
-    <string name="status_bar_battery_status_circle">Circle</string>
-    <string name="status_bar_battery_status_circle_percentage">Circle with percentage</string>
+    <!-- Battery icon style  -->
+    <string name="status_bar_battery">Battery icon style</string>
+    <string name="status_bar_battery_native">Native</string>
+    <string name="status_bar_battery_hidden">Hidden</string>
+    <string name="status_bar_battery_circle">Circle</string>
 
     </resources>

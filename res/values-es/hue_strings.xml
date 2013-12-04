@@ -37,9 +37,10 @@
     <!-- Status bar  -->
     <string name="status_bar_title">Barra de estado</string>
 
-    <!-- Statusbar native battery percent -->
-    <string name="status_bar_native_battery_percentage">Porcentaje nativo de batería</string>
-    <string name="status_bar_native_battery_percentage_summary">Mostrar porcentaje de carga de batería dentro del icono</string>
+    <!-- Status bar native battery percent -->
+    <string name="status_bar_battery_percentage">Porcentaje de batería</string>
+    <string name="status_bar_battery_percentage_summary">Mostrar porcentaje de carga dentro del icono</string>
+    <string name="status_bar_battery_percentage_info">El icono de la batería debe mostrarse</string>
 
     <!-- Status bar brightness control -->
     <string name="status_bar_toggle_brightness">Control de brillo</string>
@@ -55,11 +56,10 @@
     <string name="quick_pulldown_left">Borde izquierdo</string>
     <string name="quick_pulldown_right">Borde derecho</string>
 
-    <!-- Icon style  -->
-    <string name="status_bar_battery">Estilo del estado de la batería</string>
-    <string name="status_bar_style_icon">Icono nativo</string>
-    <string name="status_bar_style_hidden">Oculto</string>
-    <string name="status_bar_battery_status_circle">Circular</string>
-    <string name="status_bar_battery_status_circle_percentage">Circular con porcentaje</string>
+    <!-- Battery icon style  -->
+    <string name="status_bar_battery">Estilo del icono de la batería</string>
+    <string name="status_bar_battery_native">Nativo</string>
+    <string name="status_bar_battery_hidden">Oculto</string>
+    <string name="status_bar_battery_circle">Circular</string>
 
 </resources>
