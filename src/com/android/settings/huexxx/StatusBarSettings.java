@@ -20,11 +20,10 @@ public class StatusBarSettings extends SettingsPreferenceFragment implements OnP
     private static final String STATUS_BAR_BATTERY = "status_bar_battery";
     private static final String STATUS_BAR_BRIGHTNESS_CONTROL = "status_bar_brightness_control";
     private static final String STATUS_BAR_BATTERY_PERCENTAGE = "status_bar_battery_percentage";
-    private static final String STATUS_BAR_NATIVE_BATTERY_PERCENTAGE = "status_bar_native_battery_percentage";
     private static final String QUICK_PULLDOWN = "quick_pulldown";
 
     private ListPreference mStatusBarBattery;
-    private CheckBoxPreference mStatusBarNativeBatteryPercentage;
+    private CheckBoxPreference mStatusBarBatteryPercentage;
     private CheckBoxPreference mStatusBarBrightnessControl;
     private ListPreference mQuickPulldown;
 
@@ -36,7 +35,7 @@ public class StatusBarSettings extends SettingsPreferenceFragment implements OnP
 
         mStatusBarBattery = (ListPreference) getPreferenceScreen().findPreference(STATUS_BAR_BATTERY);
         mStatusBarBrightnessControl = (CheckBoxPreference) getPreferenceScreen().findPreference(STATUS_BAR_BRIGHTNESS_CONTROL);
-        mStatusBarNativeBatteryPercentage = (CheckBoxPreference) getPreferenceScreen().
+        mStatusBarBatteryPercentage = (CheckBoxPreference) getPreferenceScreen().
                 findPreference(STATUS_BAR_BATTERY_PERCENTAGE);
         mQuickPulldown = (ListPreference) getPreferenceScreen().findPreference(QUICK_PULLDOWN);
 
@@ -47,20 +46,16 @@ public class StatusBarSettings extends SettingsPreferenceFragment implements OnP
         switch (batteryStyleValue) {
         case 0:
         case 2:
-            mStatusBarNativeBatteryPercentage.setChecked(false);
-            Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
-                    Settings.System.STATUS_BAR_NATIVE_BATTERY_PERCENTAGE, 0);
+            mStatusBarBatteryPercentage.setChecked(false);
             break;
         case 1:
         case 3:
-            mStatusBarNativeBatteryPercentage.setChecked(true);
-            Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
-                    Settings.System.STATUS_BAR_NATIVE_BATTERY_PERCENTAGE, 1);
+            mStatusBarBatteryPercentage.setChecked(true);
             batteryStyleValue--;
             break;
         default:
-            mStatusBarNativeBatteryPercentage.setEnabled(false);
-            mStatusBarNativeBatteryPercentage.setSummary(R.string.status_bar_battery_percentage_info);
+            mStatusBarBatteryPercentage.setEnabled(false);
+            mStatusBarBatteryPercentage.setSummary(R.string.status_bar_battery_percentage_info);
             batteryStyleValue = 4;
             break;
         }
@@ -102,14 +97,14 @@ public class StatusBarSettings extends SettingsPreferenceFragment implements OnP
             switch (batteryStyleValue) {
             case 0:
             case 2:
-                mStatusBarNativeBatteryPercentage.setEnabled(true);
-                mStatusBarNativeBatteryPercentage.setSummary(R.string.status_bar_battery_percentage_summary);
-                if (mStatusBarNativeBatteryPercentage.isChecked())
+                mStatusBarBatteryPercentage.setEnabled(true);
+                mStatusBarBatteryPercentage.setSummary(R.string.status_bar_battery_percentage_summary);
+                if (mStatusBarBatteryPercentage.isChecked())
                     batteryStyleValue++;
                 break;
             default:
-                mStatusBarNativeBatteryPercentage.setEnabled(false);
-                mStatusBarNativeBatteryPercentage.setSummary(R.string.status_bar_battery_percentage_info);
+                mStatusBarBatteryPercentage.setEnabled(false);
+                mStatusBarBatteryPercentage.setSummary(R.string.status_bar_battery_percentage_info);
                 batteryStyleValue = 4;
                 break;
             }
@@ -136,8 +131,8 @@ public class StatusBarSettings extends SettingsPreferenceFragment implements OnP
             Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
                     Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, value ? 1 : 0);
             return true;
-        } else if (preference == mStatusBarNativeBatteryPercentage) {
-            value = mStatusBarNativeBatteryPercentage.isChecked();
+        } else if (preference == mStatusBarBatteryPercentage) {
+            value = mStatusBarBatteryPercentage.isChecked();
             int batteryStyleValue = Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(), 
                         Settings.System.STATUS_BAR_BATTERY, 0);
             switch (batteryStyleValue) {
@@ -160,8 +155,6 @@ public class StatusBarSettings extends SettingsPreferenceFragment implements OnP
             default:
                 break;
             }
-            Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
-                    Settings.System.STATUS_BAR_NATIVE_BATTERY_PERCENTAGE, value ? 1 : 0);
             return true;
         }
         return false;
