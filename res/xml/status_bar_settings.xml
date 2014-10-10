@@ -29,4 +29,10 @@
         android:persistent="false"
         android:title="@string/quick_pulldown" />
 
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="status_bar_double_tap_to_sleep"
+        android:summary="@string/status_bar_double_tap_to_sleep_summary"
+        android:title="@string/status_bar_double_tap_to_sleep" />
+
 </PreferenceScreen>

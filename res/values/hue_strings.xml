@@ -59,6 +59,10 @@
     <string name="status_bar_toggle_brightness_summary">Adjust brightness by sliding across status bar</string>
     <string name="status_bar_toggle_info">Automatic brightness must be disabled</string>
 
+    <!-- Status bar double-tap to sleep -->
+    <string name="status_bar_double_tap_to_sleep">Double-tap to sleep</string>
+    <string name="status_bar_double_tap_to_sleep_summary">Double tap status bar or lock screen slider to put the device to sleep</string>
+
     <!-- Quick settings -->
     <string name="quick_pulldown">Quick pulldown</string>
     <string name="quick_pulldown_summary">%1$s edge of the status bar pulls down Quick Settings</string>
@@ -78,5 +82,7 @@
     multiple font sizes in a limited amount of space. -->
     <string name="font_size_sample">Sample</string>
     <string name="summary_font_size" translatable="false">%1$s</string>
+
+
 
     </resources>

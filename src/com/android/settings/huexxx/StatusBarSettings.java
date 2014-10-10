@@ -13,18 +13,19 @@ import android.provider.Settings.SettingNotFoundException;
 
 import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
-import com.android.settings.Utils;
 
 public class StatusBarSettings extends SettingsPreferenceFragment implements OnPreferenceChangeListener {
 
     private static final String STATUS_BAR_BATTERY = "status_bar_battery";
     private static final String STATUS_BAR_BRIGHTNESS_CONTROL = "status_bar_brightness_control";
     private static final String STATUS_BAR_BATTERY_PERCENTAGE = "status_bar_battery_percentage";
+    private static final String STATUS_BAR_DOUBLE_TAP_TO_SLEEP = "status_bar_double_tap_to_sleep";
     private static final String QUICK_PULLDOWN = "quick_pulldown";
 
     private ListPreference mStatusBarBattery;
     private CheckBoxPreference mStatusBarBatteryPercentage;
     private CheckBoxPreference mStatusBarBrightnessControl;
+    private CheckBoxPreference mStatusBarDoubleTapToSleep;
     private ListPreference mQuickPulldown;
 
     @Override
@@ -37,6 +38,8 @@ public class StatusBarSettings extends SettingsPreferenceFragment implements OnP
         mStatusBarBrightnessControl = (CheckBoxPreference) getPreferenceScreen().findPreference(STATUS_BAR_BRIGHTNESS_CONTROL);
         mStatusBarBatteryPercentage = (CheckBoxPreference) getPreferenceScreen().
                 findPreference(STATUS_BAR_BATTERY_PERCENTAGE);
+        mStatusBarDoubleTapToSleep = (CheckBoxPreference) getPreferenceScreen().
+                findPreference(STATUS_BAR_DOUBLE_TAP_TO_SLEEP);
         mQuickPulldown = (ListPreference) getPreferenceScreen().findPreference(QUICK_PULLDOWN);
 
         // Battery style
@@ -62,31 +65,28 @@ public class StatusBarSettings extends SettingsPreferenceFragment implements OnP
         mStatusBarBattery.setValue(String.valueOf(batteryStyleValue));
         mStatusBarBattery.setSummary(mStatusBarBattery.getEntry());
 
-        if (!Utils.isPhone(getActivity())) {
-            // only show on phones
-            getPreferenceScreen().removePreference(mStatusBarBrightnessControl);
-            if (mQuickPulldown != null)
-                getPreferenceScreen().removePreference(mQuickPulldown);
-        } else {
-            // Status bar brightness
-            mStatusBarBrightnessControl.setChecked((Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(), 
-                    Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0) == 1));
-            try {
-                if (Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(),
-                        Settings.System.SCREEN_BRIGHTNESS_MODE) == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC) {
-                    mStatusBarBrightnessControl.setEnabled(false);
-                    mStatusBarBrightnessControl.setSummary(R.string.status_bar_toggle_info);
-                }
-            } catch (SettingNotFoundException e) {
+        // Status bar brightness
+        mStatusBarBrightnessControl.setChecked((Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(), 
+                Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0) == 1));
+        try {
+            if (Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS_MODE) == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC) {
+                mStatusBarBrightnessControl.setEnabled(false);
+                mStatusBarBrightnessControl.setSummary(R.string.status_bar_toggle_info);
             }
+        } catch (SettingNotFoundException e) {
+        }            
 
-            // Quick pulldown
-            mQuickPulldown.setOnPreferenceChangeListener(this);
-            int quickPulldownValue = Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(), 
-                    Settings.System.QS_QUICK_PULLDOWN, 0);
-            mQuickPulldown.setValue(String.valueOf(quickPulldownValue));
-            updatePulldownSummary(quickPulldownValue);
-        }
+        // Quick pulldown
+        mQuickPulldown.setOnPreferenceChangeListener(this);
+        int quickPulldownValue = Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(), 
+                Settings.System.QS_QUICK_PULLDOWN, 0);
+        mQuickPulldown.setValue(String.valueOf(quickPulldownValue));
+        updatePulldownSummary(quickPulldownValue);
+
+        // Double-tap to sleep
+        mStatusBarDoubleTapToSleep.setChecked((Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(), 
+                Settings.System.STATUS_BAR_DOUBLE_TAP_TO_SLEEP, 0) == 1));
     }
 
     public boolean onPreferenceChange(Preference preference, Object objValue) {
@@ -130,6 +130,11 @@ public class StatusBarSettings extends SettingsPreferenceFragment implements OnP
             value = mStatusBarBrightnessControl.isChecked();
             Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
                     Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, value ? 1 : 0);
+            return true;
+        } else if (preference == mStatusBarDoubleTapToSleep) {
+            value = mStatusBarDoubleTapToSleep.isChecked();
+            Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
+                    Settings.System.STATUS_BAR_DOUBLE_TAP_TO_SLEEP, value ? 1 : 0);
             return true;
         } else if (preference == mStatusBarBatteryPercentage) {
             value = mStatusBarBatteryPercentage.isChecked();
