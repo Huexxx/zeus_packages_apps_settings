@@ -1691,7 +1691,7 @@
         </activity>
 
         <!-- Huexxx's Tweaks -->
-        <activity android:name=".huexxx.SystemSettings" />
+        <activity android:name=".huexxx.HuexxxSettings" />
 
         <receiver android:name=".widget.SettingsAppWidgetProvider"
                 android:label="@string/gadget_title"

@@ -19,9 +19,9 @@
     <!-- About phone screen, Free memory info -->
     <string name="mem_info">Memory</string>
 
-    <!-- System Interface settings  -->
-    <string name="system_settings_title">Huexxx\'s Tweaks</string>
-    <string name="system_interface_title">Huexxx\'s Tweaks</string>
+    <!-- Huexxx Interface settings  -->
+    <string name="huexxx_settings_title">Huexxx\'s Tweaks</string>
+    <string name="huexxx_interface_title">Huexxx\'s Tweaks</string>
 
     <!-- Navigation Bar -->
     <string name="navigation_bar_title">Navigation bar</string>

@@ -14,9 +14,9 @@
     <!-- About phone screen, Free memory info -->
     <string name="mem_info">Memoria</string>
 
-    <!-- System Interface settings  -->
-    <string name="system_settings_title">Ajustes de Huexxx</string>
-    <string name="system_interface_title">Ajustes de Huexxx</string>
+    <!-- Huexxx Interface settings  -->
+    <string name="huexxx_settings_title">Ajustes de Huexxx</string>
+    <string name="huexxx_interface_title">Ajustes de Huexxx</string>
   
     <!-- Navigation Bar -->
     <string name="navigation_bar_title">Barra de navegación</string>
