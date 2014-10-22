@@ -4,6 +4,9 @@
 
     <!-- General -->
     <string name="reset">Restablecer</string>
+    <string name="generic_enabled">Activado</string>
+    <string name="generic_disabled">Desactivado</string>
+    <string name="default_value">Por defecto</string>
 
     <!-- About phone screen, build date of ROM -->
     <string name="build_date">Fecha de compilación</string>
@@ -67,13 +70,11 @@
 
     <!-- Display settings screen, notification light settings -->
     <string name="display_category_light_options_title">Opciones del Led</string>
+    <string name="notification_light_title">Led de notificación</string>
     <string name="notification_light_general_title">General</string>
     <string name="notification_light_applist_title">Aplicaciones</string>
     <string name="notification_light_phonelist_title">Teléfono</string>
     <string name="notification_light_use_custom">Usar valores personalizados</string>
-    <string name="notification_light_enabled">Activado</string>
-    <string name="notification_light_disabled">Desactivado</string>
-    <string name="notification_light_default_value">Por defecto</string>
     <string name="notification_light_missed_call_title">Llamada perdida</string>
     <string name="notification_light_voicemail_title">Buzón de voz</string>
     <string name="notification_light_choose_app">Selecciona aplicación</string>
@@ -105,7 +106,6 @@
     <string name="pulse_speed_very_slow">Muy lento</string>
 
     <!-- Battery light settings -->
-    <string name="battery_reset_title">Restablecer</string>
     <string name="battery_light_title">Led de Batería</string>
     <string name="battery_low_pulse_title">Latir con batería baja</string>
     <string name="battery_light_list_title">Colores mientras carga</string>
