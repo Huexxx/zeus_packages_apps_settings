@@ -4,9 +4,11 @@ package com.android.settings.huexxx;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
+import android.content.ContentResolver;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceScreen;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -17,7 +19,11 @@ import com.android.settings.SettingsPreferenceFragment;
 public class HuexxxSettings extends SettingsPreferenceFragment implements
         Preference.OnPreferenceChangeListener {
 
+    private static final String KEY_BATTERY_LIGHT = "battery_light";
+    private static final String KEY_LIGHT_OPTIONS = "category_light_options";
     private static final String KEY_NAVIGATION_BAR_HEIGHT = "navigation_bar_height";
+    private static final String KEY_NOTIFICATION_PULSE = "notification_pulse";
+    private static final String KEY_NOTIFICATION_LIGHT = "notification_light";
     private static final String QUICK_PULLDOWN = "quick_pulldown";
     private static final String STATUS_BAR_BATTERY = "status_bar_battery";
     private static final String STATUS_BAR_BRIGHTNESS_CONTROL = "status_bar_brightness_control";
@@ -29,17 +35,27 @@ public class HuexxxSettings extends SettingsPreferenceFragment implements
     private CheckBoxPreference mStatusBarBrightnessControl;
     private CheckBoxPreference mStatusBarDoubleTapToSleep;
     private ListPreference mNavigationBarHeight;
+    private CheckBoxPreference mNotificationPulse;
     private ListPreference mQuickPulldown;
     private ListPreference mStatusBarBattery;
+    private PreferenceCategory mLightOptions;
+    private PreferenceScreen mNotificationLight;
+    private PreferenceScreen mBatteryPulse;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ContentResolver resolver = getActivity().getContentResolver();
 
         addPreferencesFromResource(R.xml.huexxx_settings);
 
-        mNavigationBarHeight = (ListPreference) findPreference(KEY_NAVIGATION_BAR_HEIGHT);
+        PreferenceScreen prefSet = getPreferenceScreen();
 
+        mBatteryPulse = (PreferenceScreen) findPreference(KEY_BATTERY_LIGHT);
+        mLightOptions = (PreferenceCategory) prefSet.findPreference(KEY_LIGHT_OPTIONS);
+        mNavigationBarHeight = (ListPreference) findPreference(KEY_NAVIGATION_BAR_HEIGHT);
+        mNotificationPulse = (CheckBoxPreference) findPreference(KEY_NOTIFICATION_PULSE);
+        mNotificationLight = (PreferenceScreen) findPreference(KEY_NOTIFICATION_LIGHT);
         mQuickPulldown = (ListPreference) getPreferenceScreen().findPreference(QUICK_PULLDOWN);
         mStatusBarBattery = (ListPreference) getPreferenceScreen().findPreference(STATUS_BAR_BATTERY);
         mStatusBarBatteryPercentage = (CheckBoxPreference) getPreferenceScreen().
@@ -55,6 +71,41 @@ public class HuexxxSettings extends SettingsPreferenceFragment implements
                 Settings.System.NAVIGATION_BAR_HEIGHT, 48);
         mNavigationBarHeight.setValue(String.valueOf(statusNavigationBarHeight));
         mNavigationBarHeight.setSummary(mNavigationBarHeight.getEntry());
+
+        // LED notifications
+        if (mNotificationPulse != null && mNotificationLight != null && mBatteryPulse != null) {
+            if (getResources().getBoolean(
+                    com.android.internal.R.bool.config_intrusiveNotificationLed)) {
+                 if (getResources().getBoolean(
+                         com.android.internal.R.bool.config_multiColorNotificationLed)) {
+                     mLightOptions.removePreference(mNotificationPulse);
+                     updateLightPulseDescription();
+                 } else {
+                     mLightOptions.removePreference(mNotificationLight);
+                     try {
+                         mNotificationPulse.setChecked(Settings.System.getInt(getActivity().getContentResolver(),
+                                 Settings.System.NOTIFICATION_LIGHT_PULSE) == 1);
+                     } catch (SettingNotFoundException e) {
+                         e.printStackTrace();
+                     }
+                 }
+            } else {
+                 mLightOptions.removePreference(mNotificationPulse);
+                 mLightOptions.removePreference(mNotificationLight);
+            }
+
+            if (!getResources().getBoolean(
+                    com.android.internal.R.bool.config_intrusiveBatteryLed)) {
+                mLightOptions.removePreference(mBatteryPulse);
+            } else {
+                updateBatteryPulseDescription();
+            }
+
+            //If we're removed everything, get rid of the category
+            if (mLightOptions.getPreferenceCount() == 0) {
+                prefSet.removePreference(mLightOptions);
+            }
+        }
 
         // Quick pulldown
         mQuickPulldown.setOnPreferenceChangeListener(this);
@@ -101,7 +152,87 @@ public class HuexxxSettings extends SettingsPreferenceFragment implements
         // Double-tap to sleep
         mStatusBarDoubleTapToSleep.setChecked((Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(), 
                 Settings.System.STATUS_BAR_DOUBLE_TAP_TO_SLEEP, 0) == 1));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        updateLightPulseDescription();
+        updateBatteryPulseDescription();
+    }
+
+    private void updateLightPulseDescription() {
+        if (mNotificationLight == null) {
+            return;
         }
+        if (Settings.System.getInt(getActivity().getContentResolver(),
+                Settings.System.NOTIFICATION_LIGHT_PULSE, 0) == 1) {
+            mNotificationLight.setSummary(getString(R.string.generic_enabled));
+        } else {
+            mNotificationLight.setSummary(getString(R.string.generic_disabled));
+        }
+    }
+
+    private void updateBatteryPulseDescription() {
+        if (mBatteryPulse == null) {
+            return;
+        }
+        if (Settings.System.getInt(getActivity().getContentResolver(),
+                Settings.System.BATTERY_LIGHT_ENABLED, 1) == 1) {
+            mBatteryPulse.setSummary(getString(R.string.generic_enabled));
+        } else {
+            mBatteryPulse.setSummary(getString(R.string.generic_disabled));
+        }
+     }
+
+    @Override
+    public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
+        boolean value;
+
+        if (preference == mNotificationPulse) {
+            value = mNotificationPulse.isChecked();
+            Settings.System.putInt(getContentResolver(), Settings.System.NOTIFICATION_LIGHT_PULSE,
+                    value ? 1 : 0);
+            return true;
+        } else if (preference == mStatusBarBatteryPercentage) {
+            value = mStatusBarBatteryPercentage.isChecked();
+            int batteryStyleValue = Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(), 
+                        Settings.System.STATUS_BAR_BATTERY, 0);
+            switch (batteryStyleValue) {
+            case 0:
+            case 2:
+                if (value) {
+                    batteryStyleValue++;
+                    Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
+                            Settings.System.STATUS_BAR_BATTERY, batteryStyleValue);
+                }
+                break;
+            case 1:
+            case 3:
+                if (!value) {
+                    batteryStyleValue--;
+                    Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
+                            Settings.System.STATUS_BAR_BATTERY, batteryStyleValue);
+                }
+                break;
+            default:
+                break;
+            }
+            return true;
+        } else if (preference == mStatusBarBrightnessControl) {
+            value = mStatusBarBrightnessControl.isChecked();
+            Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
+                    Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, value ? 1 : 0);
+            return true;
+        } else if (preference == mStatusBarDoubleTapToSleep) {
+            value = mStatusBarDoubleTapToSleep.isChecked();
+            Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
+                    Settings.System.STATUS_BAR_DOUBLE_TAP_TO_SLEEP, value ? 1 : 0);
+            return true;
+        }
+        return super.onPreferenceTreeClick(preferenceScreen, preference);
+    }
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object objValue) {
@@ -140,47 +271,6 @@ public class HuexxxSettings extends SettingsPreferenceFragment implements
             Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
                     Settings.System.STATUS_BAR_BATTERY, batteryStyleValue);
             mStatusBarBattery.setSummary(mStatusBarBattery.getEntries()[batteryStyleIndex]);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
-        boolean value;
-        if (preference == mStatusBarBatteryPercentage) {
-            value = mStatusBarBatteryPercentage.isChecked();
-            int batteryStyleValue = Settings.System.getInt(getActivity().getApplicationContext().getContentResolver(), 
-                        Settings.System.STATUS_BAR_BATTERY, 0);
-            switch (batteryStyleValue) {
-            case 0:
-            case 2:
-                if (value) {
-                    batteryStyleValue++;
-                    Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
-                            Settings.System.STATUS_BAR_BATTERY, batteryStyleValue);
-                }
-                break;
-            case 1:
-            case 3:
-                if (!value) {
-                    batteryStyleValue--;
-                    Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
-                            Settings.System.STATUS_BAR_BATTERY, batteryStyleValue);
-                }
-                break;
-            default:
-                break;
-            }
-            return true;
-        } else if (preference == mStatusBarDoubleTapToSleep) {
-            value = mStatusBarDoubleTapToSleep.isChecked();
-            Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
-                    Settings.System.STATUS_BAR_DOUBLE_TAP_TO_SLEEP, value ? 1 : 0);
-            return true;
-        } else if (preference == mStatusBarBrightnessControl) {
-            value = mStatusBarBrightnessControl.isChecked();
-            Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
-                    Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, value ? 1 : 0);
             return true;
         }
         return false;
