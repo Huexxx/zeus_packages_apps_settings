@@ -1,10 +1,21 @@
 
 package com.android.settings.huexxx;
 
-import android.content.res.Resources;
-import android.os.Bundle;
-import android.preference.CheckBoxPreference;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.ContentResolver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.content.res.Resources;
+import android.net.NetworkUtils;
+import android.net.wifi.IWifiManager;
+import android.net.wifi.WifiInfo;
+import android.os.Bundle;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
@@ -12,6 +23,7 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceScreen;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import android.util.Log;
 
 import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
@@ -19,6 +31,7 @@ import com.android.settings.SettingsPreferenceFragment;
 public class HuexxxSettings extends SettingsPreferenceFragment implements
         Preference.OnPreferenceChangeListener {
 
+    private static final String ADB_TCPIP  = "adb_over_network";
     private static final String KEY_BATTERY_LIGHT = "battery_light";
     private static final String KEY_LIGHT_OPTIONS = "category_light_options";
     private static final String KEY_NAVIGATION_BAR_HEIGHT = "navigation_bar_height";
@@ -31,11 +44,15 @@ public class HuexxxSettings extends SettingsPreferenceFragment implements
     private static final String STATUS_BAR_DOUBLE_TAP_TO_SLEEP = "status_bar_double_tap_to_sleep";
     private static final String TAG = "HuexxxSettings";
 
+    // Dialog identifiers used in showDialog
+    private static final int DLG_ADBTCP = 0;
+
+    private CheckBoxPreference mAdbOverNetwork;
+    private CheckBoxPreference mNotificationPulse;
     private CheckBoxPreference mStatusBarBatteryPercentage;
     private CheckBoxPreference mStatusBarBrightnessControl;
     private CheckBoxPreference mStatusBarDoubleTapToSleep;
     private ListPreference mNavigationBarHeight;
-    private CheckBoxPreference mNotificationPulse;
     private ListPreference mQuickPulldown;
     private ListPreference mStatusBarBattery;
     private PreferenceCategory mLightOptions;
@@ -51,6 +68,7 @@ public class HuexxxSettings extends SettingsPreferenceFragment implements
 
         PreferenceScreen prefSet = getPreferenceScreen();
 
+        mAdbOverNetwork = (CheckBoxPreference) findPreference(ADB_TCPIP);
         mBatteryPulse = (PreferenceScreen) findPreference(KEY_BATTERY_LIGHT);
         mLightOptions = (PreferenceCategory) prefSet.findPreference(KEY_LIGHT_OPTIONS);
         mNavigationBarHeight = (ListPreference) findPreference(KEY_NAVIGATION_BAR_HEIGHT);
@@ -63,6 +81,9 @@ public class HuexxxSettings extends SettingsPreferenceFragment implements
         mStatusBarBrightnessControl = (CheckBoxPreference) getPreferenceScreen().findPreference(STATUS_BAR_BRIGHTNESS_CONTROL);
         mStatusBarDoubleTapToSleep = (CheckBoxPreference) getPreferenceScreen().
                 findPreference(STATUS_BAR_DOUBLE_TAP_TO_SLEEP);
+
+        // ADB over network
+        updateAdbOverNetwork();
 
         // Navigation bar height
         mNavigationBarHeight.setOnPreferenceChangeListener(this);
@@ -158,39 +179,24 @@ public class HuexxxSettings extends SettingsPreferenceFragment implements
     public void onResume() {
         super.onResume();
 
-        updateLightPulseDescription();
+        updateAdbOverNetwork();
         updateBatteryPulseDescription();
+        updateLightPulseDescription();
     }
-
-    private void updateLightPulseDescription() {
-        if (mNotificationLight == null) {
-            return;
-        }
-        if (Settings.System.getInt(getActivity().getContentResolver(),
-                Settings.System.NOTIFICATION_LIGHT_PULSE, 0) == 1) {
-            mNotificationLight.setSummary(getString(R.string.generic_enabled));
-        } else {
-            mNotificationLight.setSummary(getString(R.string.generic_disabled));
-        }
-    }
-
-    private void updateBatteryPulseDescription() {
-        if (mBatteryPulse == null) {
-            return;
-        }
-        if (Settings.System.getInt(getActivity().getContentResolver(),
-                Settings.System.BATTERY_LIGHT_ENABLED, 1) == 1) {
-            mBatteryPulse.setSummary(getString(R.string.generic_enabled));
-        } else {
-            mBatteryPulse.setSummary(getString(R.string.generic_disabled));
-        }
-     }
 
     @Override
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
         boolean value;
 
-        if (preference == mNotificationPulse) {
+        if (preference == mAdbOverNetwork) {
+            if (mAdbOverNetwork.isChecked()) {
+                showDialogInner(DLG_ADBTCP);
+            } else {
+                Settings.Secure.putInt(getActivity().getContentResolver(),
+                        Settings.Secure.ADB_PORT, -1);
+                updateAdbOverNetwork();
+            }
+        } else if (preference == mNotificationPulse) {
             value = mNotificationPulse.isChecked();
             Settings.System.putInt(getContentResolver(), Settings.System.NOTIFICATION_LIGHT_PULSE,
                     value ? 1 : 0);
@@ -276,6 +282,67 @@ public class HuexxxSettings extends SettingsPreferenceFragment implements
         return false;
     }
 
+    private void updateAdbOverNetwork() {
+        final ContentResolver resolver = getActivity().getContentResolver();
+
+        int adb = Settings.Global.getInt(resolver, Settings.Global.ADB_ENABLED, 0);
+
+        if (adb == 0) {
+            mAdbOverNetwork.setEnabled(false);
+            mAdbOverNetwork.setSummary(R.string.adb_disabled_summary);
+            return;
+        }
+
+        int port = Settings.Secure.getInt(resolver, Settings.Secure.ADB_PORT, 0);
+        boolean enabled = port > 0;
+
+        mAdbOverNetwork.setChecked(enabled);
+
+        WifiInfo wifiInfo = null;
+
+        if (enabled) {
+            IWifiManager wifiManager = IWifiManager.Stub.asInterface(
+                    ServiceManager.getService(Context.WIFI_SERVICE));
+            try {
+                wifiInfo = wifiManager.getConnectionInfo();
+            } catch (RemoteException e) {
+                Log.e(TAG, "wifiManager, getConnectionInfo()", e);
+            }
+        }
+
+        if (wifiInfo != null) {
+            String hostAddress = NetworkUtils.intToInetAddress(
+                    wifiInfo.getIpAddress()).getHostAddress();
+            mAdbOverNetwork.setSummary(hostAddress + ":" + String.valueOf(port));
+        } else {
+            mAdbOverNetwork.setSummary(R.string.adb_over_network_summary);
+        }
+    }
+
+    private void updateBatteryPulseDescription() {
+        if (mBatteryPulse == null) {
+            return;
+        }
+        if (Settings.System.getInt(getActivity().getContentResolver(),
+                Settings.System.BATTERY_LIGHT_ENABLED, 1) == 1) {
+            mBatteryPulse.setSummary(getString(R.string.generic_enabled));
+        } else {
+            mBatteryPulse.setSummary(getString(R.string.generic_disabled));
+        }
+     }
+
+    private void updateLightPulseDescription() {
+        if (mNotificationLight == null) {
+            return;
+        }
+        if (Settings.System.getInt(getActivity().getContentResolver(),
+                Settings.System.NOTIFICATION_LIGHT_PULSE, 0) == 1) {
+            mNotificationLight.setSummary(getString(R.string.generic_enabled));
+        } else {
+            mNotificationLight.setSummary(getString(R.string.generic_disabled));
+        }
+    }
+
     private void updatePulldownSummary(int value) {
         Resources res = getResources();
 
@@ -287,6 +354,56 @@ public class HuexxxSettings extends SettingsPreferenceFragment implements
                     ? R.string.quick_pulldown_summary_left
                     : R.string.quick_pulldown_summary_right);
             mQuickPulldown.setSummary(res.getString(R.string.quick_pulldown_summary, direction));
+        }
+    }
+
+    private void showDialogInner(int id) {
+        DialogFragment newFragment = MyAlertDialogFragment.newInstance(id);
+        newFragment.setTargetFragment(this, 0);
+        newFragment.show(getFragmentManager(), "dialog " + id);
+    }
+
+    public static class MyAlertDialogFragment extends DialogFragment {
+
+        public static MyAlertDialogFragment newInstance(int id) {
+            MyAlertDialogFragment frag = new MyAlertDialogFragment();
+            Bundle args = new Bundle();
+            args.putInt("id", id);
+            frag.setArguments(args);
+            return frag;
+        }
+
+        HuexxxSettings getOwner() {
+            return (HuexxxSettings) getTargetFragment();
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            int id = getArguments().getInt("id");
+            switch (id) {
+                case DLG_ADBTCP:
+                    return new AlertDialog.Builder(getActivity())
+                    .setTitle(R.string.adb_over_network)
+                    .setMessage(getActivity().getString(R.string.adb_over_network_warning))
+                    .setIconAttribute(android.R.attr.alertDialogIcon)
+                    .setPositiveButton(R.string.dlg_ok,
+                        new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            Settings.Secure.putInt(getActivity().getContentResolver(),
+                                    Settings.Secure.ADB_PORT, 5555);
+                            getOwner().updateAdbOverNetwork();
+                        }
+                    })
+                    .setNegativeButton(R.string.dlg_cancel,
+                        new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Reset the toggle
+                            getOwner().mAdbOverNetwork.setChecked(false);
+                        }
+                    })
+                    .create();
+            }
+            throw new IllegalArgumentException("unknown id " + id);
         }
     }
 }

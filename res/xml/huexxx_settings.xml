@@ -6,6 +6,17 @@
     xmlns:settings="http://schemas.android.com/apk/res/com.android.settings">
 
     <PreferenceCategory
+        android:key="debugging"
+        android:title="@string/debug_debugging_category">
+
+        <CheckBoxPreference
+            android:key="adb_over_network"
+            android:title="@string/adb_over_network"
+            android:summary="@string/adb_over_network_summary"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:key="navigation_bar"
         android:title="@string/navigation_bar_title">
 
